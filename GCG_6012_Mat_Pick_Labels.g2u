@@ -1,0 +1,483 @@
+Program.Sub.ScreenSU.Start
+Gui.F_MatPick..Create
+Gui.F_MatPick..Size(13680,9180)
+Gui.F_MatPick..MinX(7500)
+Gui.F_MatPick..MinY(4500)
+Gui.F_MatPick..Position(0,0)
+Gui.F_MatPick..BackColor(-2147483633)
+Gui.F_MatPick..MousePointer(0)
+Gui.F_MatPick..Event(UnLoad,F_MatPick_UnLoad)
+Gui.F_MatPick..Caption("Material Picking Labels")
+Gui.F_MatPick.frameRange.Create(Frame)
+Gui.F_MatPick.frameRange.Size(13560,945)
+Gui.F_MatPick.frameRange.Position(0,0)
+Gui.F_MatPick.frameRange.BorderStyle(0)
+Gui.F_MatPick.frameRange.Anchor(13)
+Gui.F_MatPick.txtBegJob.Create(TextBox,"",True,1065,300,0,120,450,True,0,"Arial",8,-2147483643,1)
+Gui.F_MatPick.txtBegJob.Parent("frameRange")
+Gui.F_MatPick.txtBegJob.MaxLength(6)
+Gui.F_MatPick.txtBegJob.Event(LostFocus,txtWO_LostFocus)
+Gui.F_MatPick.lblBegJob.Create(Label,"Beginning Job",True,1110,255,0,105,240,True,0,"Arial",8,-2147483633,0)
+Gui.F_MatPick.lblBegJob.Parent("frameRange")
+Gui.F_MatPick.txtBegSuf.Create(TextBox,"",True,690,300,0,1290,450,True,0,"Arial",8,-2147483643,1)
+Gui.F_MatPick.txtBegSuf.Parent("frameRange")
+Gui.F_MatPick.txtBegSuf.MaxLength(3)
+Gui.F_MatPick.txtBegSuf.Event(LostFocus,txtWO_LostFocus)
+Gui.F_MatPick.lblBegSuf.Create(Label,"Suffix",True,570,255,0,1275,240,True,0,"Arial",8,-2147483633,0)
+Gui.F_MatPick.lblBegSuf.Parent("frameRange")
+Gui.F_MatPick.cmdBegWOBRW.Create(Button)
+Gui.F_MatPick.cmdBegWOBRW.Size(345,345)
+Gui.F_MatPick.cmdBegWOBRW.Position(2055,435)
+Gui.F_MatPick.cmdBegWOBRW.Parent("frameRange")
+Gui.F_MatPick.cmdBegWOBRW.Caption("^")
+Gui.F_MatPick.cmdBegWOBRW.Event(Click,cmdWOBRW_Click)
+Gui.F_MatPick.txtEndJob.Create(TextBox,"",True,1065,300,0,3000,450,True,0,"Arial",8,-2147483643,1)
+Gui.F_MatPick.txtEndJob.Parent("frameRange")
+Gui.F_MatPick.txtEndJob.MaxLength(6)
+Gui.F_MatPick.txtEndJob.Event(LostFocus,txtWO_LostFocus)
+Gui.F_MatPick.lblEndJob.Create(Label,"Ending Job",True,1080,255,0,2985,240,True,0,"Arial",8,-2147483633,0)
+Gui.F_MatPick.lblEndJob.Parent("frameRange")
+Gui.F_MatPick.txtEndSuf.Create(TextBox,"",True,690,300,0,4170,450,True,0,"Arial",8,-2147483643,1)
+Gui.F_MatPick.txtEndSuf.Parent("frameRange")
+Gui.F_MatPick.txtEndSuf.MaxLength(3)
+Gui.F_MatPick.txtEndSuf.Event(LostFocus,txtWO_LostFocus)
+Gui.F_MatPick.lblEndSuf.Create(Label,"Suffix",True,570,255,0,4155,240,True,0,"Arial",8,-2147483633,0)
+Gui.F_MatPick.lblEndSuf.Parent("frameRange")
+Gui.F_MatPick.cmdEndWOBRW.Create(Button)
+Gui.F_MatPick.cmdEndWOBRW.Size(345,345)
+Gui.F_MatPick.cmdEndWOBRW.Position(4935,435)
+Gui.F_MatPick.cmdEndWOBRW.Parent("frameRange")
+Gui.F_MatPick.cmdEndWOBRW.Caption("^")
+Gui.F_MatPick.cmdEndWOBRW.Event(Click,cmdWOBRW_Click)
+Gui.F_MatPick.lblThru.Create(Label,"thru",True,405,255,0,2505,540,True,0,"Arial",8,-2147483633,0)
+Gui.F_MatPick.lblThru.Parent("frameRange")
+Gui.F_MatPick.gsgcMats.Create(GsGridControl)
+Gui.F_MatPick.gsgcMats.Size(13560,7485)
+Gui.F_MatPick.gsgcMats.Position(0,960)
+Gui.F_MatPick.gsgcMats.Anchor(15)
+Gui.F_MatPick.gsgcMats.Event(RowCellClick,gsgcMats_RowCellClick)
+Gui.F_MatPick.cmdPrint.Create(Button)
+Gui.F_MatPick.cmdPrint.Size(1125,375)
+Gui.F_MatPick.cmdPrint.Position(60,8475)
+Gui.F_MatPick.cmdPrint.Anchor(6)
+Gui.F_MatPick.cmdPrint.Caption("Print")
+Gui.F_MatPick.cmdPrint.Event(Click,cmdPrint_Click)
+Program.Sub.ScreenSU.End
+
+Program.Sub.Preflight.Start
+Program.External.Include.Library("GCG_6012_ErrorHandling.lib")
+Program.Sub.Preflight.End
+
+Program.Sub.Main.Start
+'Author: BixRB
+'Date: 6 Jun 2020
+'GCG_6012_Mat_Pick_Labels.g2u
+'Positrol, Inc.
+'Preprocessor to process material pick labels
+V.Local.sBegJob.Declare
+V.Local.sBegSuf.Declare
+V.Local.sEndJob.Declare
+V.Local.sEndSuf.Declare
+V.Local.sFilter.Declare
+F.Intrinsic.Control.Try
+
+'Load Data first so screen is FAST
+F.Intrinsic.UI.InvokeWaitDialog("Loading WO Data","Material Picking Labels")
+
+F.Intrinsic.Control.CallSub(LoadWOData)
+
+F.Intrinsic.UI.ChangeWaitStatus("Loading Grid Settings")
+
+F.Intrinsic.Control.CallSub(SetupGrid)
+F.Intrinsic.Control.CallSub(Deserialize)
+
+F.Intrinsic.String.LPad(V.Screen.F_MatPick!txtBegJob.Text," ",6,V.Local.sBegJob)
+F.Intrinsic.String.LPad(V.Screen.F_MatPick!txtBegSuf.Text," ",3,V.Local.sBegSuf)
+F.Intrinsic.String.LPad(V.Screen.F_MatPick!txtEndJob.Text," ",6,V.Local.sEndJob)
+F.Intrinsic.String.LPad(V.Screen.F_MatPick!txtEndSuf.Text," ",3,V.Local.sEndSuf)
+F.Intrinsic.String.Build("[WO] >= '{0}{1}' and [WO] <= '{2}{3}'",V.Local.sBegJob,V.Local.sBegSuf,V.Local.sEndJob,V.Local.sEndSuf,V.Local.sFilter)
+F.Data.DataView.SetFilter("dtWOMats","dvVWOMats",V.Local.sFilter)
+
+F.Intrinsic.UI.CloseWaitDialog
+
+Gui.F_MatPick..Show
+
+F.Intrinsic.Control.Catch
+	F.Intrinsic.Control.CallSub(ErrorMessage,"ScriptFile",V.Caller.ScriptFile,"CurrentSubroutine",V.Ambient.CurrentSubroutine)
+	F.Intrinsic.Control.CallSub(F_MatPick_UnLoad)
+F.Intrinsic.Control.EndTry
+Program.Sub.Main.End
+
+Program.Sub.F_MatPick_UnLoad.Start
+F.Intrinsic.Control.Try
+
+F.Intrinsic.Control.CallSub(Serialize)
+F.Intrinsic.Control.End
+
+F.Intrinsic.Control.Catch
+	F.Intrinsic.Control.CallSub(ErrorMessage,"ScriptFile",V.Caller.ScriptFile,"CurrentSubroutine",V.Ambient.CurrentSubroutine)
+	F.Intrinsic.Control.End
+F.Intrinsic.Control.EndTry
+Program.Sub.F_MatPick_UnLoad.End
+
+Program.Sub.txtWO_LostFocus.Start
+V.Local.sJob.Declare
+V.Local.sSuf.Declare
+V.Local.sEndJob.Declare
+V.Local.sEndSuf.Declare
+V.Local.sFilter.Declare
+F.Intrinsic.Control.Try
+
+F.Intrinsic.Control.If(V.Args.ControlName.UCase,=,"TXTBEGJOB",or,V.Args.ControlName.UCase,=,"TXTBEGSUF")
+	'Lost Focus on begginning textbox
+	'Check job and suffix w/o padding
+	F.Intrinsic.String.Build("[JOB] = '{0}' and [SUFFIX] = '{1}'",V.Screen.F_MatPick!txtBegJob.Text,V.Screen.F_MatPick!txtBegSuf.Text,V.Local.sFilter)
+	F.Data.DataView.SetFilter("dtWOMats","dvWOMats",V.Local.sFilter)
+	F.Intrinsic.Control.If(V.DataView.dtWOMats!dvWOMats.RowCount,>,0)
+		'WO exists in list
+		F.Intrinsic.String.RPad(V.Screen.F_MatPick!txtBegJob.Text," ",6,V.Local.sJob)
+		F.Intrinsic.String.RPad(V.Screen.F_MatPick!txtBegSuf.Text," ",3,V.Local.sSuf)
+		Gui.F_MatPick.txtBegJob.Text(V.Local.sJob)
+		Gui.F_MatPick.txtBegSuf.Text(V.Local.sSuf)
+	F.Intrinsic.Control.Else
+		'WO does not exist in list
+		F.Intrinsic.String.LPad(V.Screen.F_MatPick!txtBegJob.Text,"0",6,V.Local.sJob)
+		F.Intrinsic.String.LPad(V.Screen.F_MatPick!txtBegSuf.Text,"0",3,V.Local.sSuf)
+		F.Intrinsic.String.Build("[JOB] = '{0}' and [SUFFIX] = '{1}'",V.Local.sJob,V.Local.sSuf,V.Local.sFilter)
+		F.Data.DataView.SetFilter("dtWOMats","dvWOMats",V.Local.sFilter)
+		F.Intrinsic.Control.If(V.DataView.dtWOMats!dvWOMats.RowCount,>,0)
+			'Padded WO exists in list
+			Gui.F_MatPick.txtBegJob.Text(V.Local.sJob)
+			Gui.F_MatPick.txtBegSuf.Text(V.Local.sSuf)
+		F.Intrinsic.Control.Else
+			'Padded WO does not exist in list
+			V.Local.sJob.Set("")
+			V.Local.sSuf.Set("")
+		F.Intrinsic.Control.EndIf
+	F.Intrinsic.Control.EndIf
+	F.Intrinsic.Control.If(V.Screen.F_MatPick!txtEndJob.Text.Trim,=,"")
+		Gui.F_MatPick.txtEndJob.Text(V.Local.sJob)
+		Gui.F_MatPick.txtEndSuf.Text(V.Local.sSuf)
+	F.Intrinsic.Control.EndIf
+F.Intrinsic.Control.Else
+	'Lost Focus on ending textbox
+	'Check job and suffix w/o padding
+	F.Intrinsic.String.Build("[JOB] = '{0}' and [SUFFIX] = '{1}'",V.Screen.F_MatPick!txtEndJob.Text,V.Screen.F_MatPick!txtEndSuf.Text,V.Local.sFilter)
+	F.Data.DataView.SetFilter("dtWOMats","dvWOMats",V.Local.sFilter)
+	F.Intrinsic.Control.If(V.DataView.dtWOMats!dvWOMats.RowCount,>,0)
+		'WO exists in list
+		F.Intrinsic.String.RPad(V.Screen.F_MatPick!txtEndJob.Text," ",6,V.Local.sJob)
+		F.Intrinsic.String.RPad(V.Screen.F_MatPick!txtEndSuf.Text," ",3,V.Local.sSuf)
+		Gui.F_MatPick.txtEndJob.Text(V.Local.sJob)
+		Gui.F_MatPick.txtEndSuf.Text(V.Local.sSuf)
+	F.Intrinsic.Control.Else
+		'WO does not exist in list
+		F.Intrinsic.String.LPad(V.Screen.F_MatPick!txtEndJob.Text,"0",6,V.Local.sJob)
+		F.Intrinsic.String.LPad(V.Screen.F_MatPick!txtEndSuf.Text,"0",3,V.Local.sSuf)
+		F.Intrinsic.String.Build("[JOB] = '{0}' and [SUFFIX] = '{1}'",V.Local.sJob,V.Local.sSuf,V.Local.sFilter)
+		F.Data.DataView.SetFilter("dtWOMats","dvWOMats",V.Local.sFilter)
+		F.Intrinsic.Control.If(V.DataView.dtWOMats!dvWOMats.RowCount,>,0)
+			'Padded WO exists in list
+			Gui.F_MatPick.txtEndJob.Text(V.Local.sJob)
+			Gui.F_MatPick.txtEndSuf.Text(V.Local.sSuf)
+		F.Intrinsic.Control.Else
+			'Padded WO does not exist in list
+			V.Local.sJob.Set("")
+			V.Local.sSuf.Set("")
+		F.Intrinsic.Control.EndIf
+	F.Intrinsic.Control.EndIf
+F.Intrinsic.Control.EndIf
+
+F.Intrinsic.String.LPad(V.Screen.F_MatPick!txtBegJob.Text," ",6,V.Local.sJob)
+F.Intrinsic.String.LPad(V.Screen.F_MatPick!txtBegSuf.Text," ",3,V.Local.sSuf)
+F.Intrinsic.String.LPad(V.Screen.F_MatPick!txtEndJob.Text," ",6,V.Local.sEndJob)
+F.Intrinsic.String.LPad(V.Screen.F_MatPick!txtEndSuf.Text," ",3,V.Local.sEndSuf)
+F.Intrinsic.String.Build("[WO] >= '{0}{1}' and [WO] <= '{2}{3}'",V.Local.sJob,V.Local.sSuf,V.Local.sEndJob,V.Local.sEndSuf,V.Local.sFilter)
+F.Data.DataView.SetFilter("dtWOMats","dvVWOMats",V.Local.sFilter)
+
+'Reset all WO's not in the current dataview
+F.Intrinsic.String.Build("[WO] < '{0}{1}' or [WO] > '{2}{3}'",V.Local.sJob,V.Local.sSuf,V.Local.sEndJob,V.Local.sEndSuf,V.Local.sFilter)
+F.Data.DataView.SetFilter("dtWOMats","dvWOMats",V.Local.sFilter)
+F.Data.DataView.SetValue("dtWOMats","dvWOMats",-1,"SELECT",False)
+
+F.Intrinsic.Control.Catch
+	F.Intrinsic.Control.CallSub(ErrorMessage,"ScriptFile",V.Caller.ScriptFile,"CurrentSubroutine",V.Ambient.CurrentSubroutine)
+	F.Intrinsic.Control.CallSub(F_MatPick_UnLoad)
+F.Intrinsic.Control.EndTry
+Program.Sub.txtWO_LostFocus.End
+
+Program.Sub.LoadWOData.Start
+F.Intrinsic.Control.Try
+
+'I'm want to use intellisense :)
+F.Data.DataTable.Create("dtWOMats")
+F.Data.DataTable.Close("dtWOMats")
+
+F.ODBC.Connection!con.OpenCompanyConnection
+F.Data.DataTable.CreateFromSQL("dtWOHead","con","select JOB, SUFFIX, DATE_DUE, CUSTOMER, SALES_ORDER as ORDER_NO, SALES_ORDER_LINE as ORDER_LINE from V_JOB_HEADER;",False)
+F.Data.DataTable.CreateFromSQL("dtWOSeqs","con","select JOB, SUFFIX, SEQ, PART, rtrim(DESCRIPTION) as DESCRIPTION, HOURS_ESTIMATED as QTY_EST, HOURS_ACTUAL as QTY_ACT, FLAG_CLOSED from V_JOB_OPERATIONS where LMO = 'M' and SEQ < '995000';",False)
+F.Data.DataTable.CreateFromSQL("dtCustMast","con","select CUSTOMER, rtrim(NAME_CUSTOMER) as NAME_CUST from V_CUSTOMER_MASTER;",False)
+F.Data.DataTable.CreateFromSQL("dtSOHead","con","select ORDER_NO, rtrim(CUSTOMER_PO) as CUST_PO from V_ORDER_HEADER;",False)
+F.ODBC.Connection!con.Close
+
+F.Data.DataTable.AddExpressionColumn("dtWOSeqs","WO","String","[JOB] + [SUFFIX]")
+F.Data.DataTable.AddExpressionColumn("dtWOSeqs","QTY_REQ","Float","iif([QTY_EST] - [QTY_ACT] < 0, 0, [QTY_EST] - [QTY_ACT])")
+F.Data.DataTable.AddExpressionColumn("dtWOSeqs","CLOSED","Boolean","iif([FLAG_CLOSED] = 'Y', True, False)")
+
+F.Data.Linq.Join("LeftJoin","DataTable","dtWOSeqs*!*SEQS","DataTable","dtWOHead*!*HEAD","SEQS.JOB = HEAD.JOB and SEQS.SUFFIX = HEAD.SUFFIX","DataTable","dtCustMast*!*CUST","HEAD.CUSTOMER = CUST.CUSTOMER","DataTable","dtSOHead*!*ORDR","HEAD.ORDER_NO = ORDR.ORDER_NO","SEQS.JOB*!*SEQS.SUFFIX*!*SEQS.WO*!*SEQS.SEQ*!*SEQS.PART*!*SEQS.DESCRIPTION*!*SEQS.QTY_REQ*!*SEQS.CLOSED*!*HEAD.DATE_DUE*!*HEAD.CUSTOMER*!*CUST.NAME_CUST*!*ORDR.CUST_PO","","","SEQS.JOB asc, SEQS.SUFFIX asc, SEQS.SEQ asc","dtWOMats",True)
+
+F.Data.DataTable.Close("dtWOHead")
+F.Data.DataTable.Close("dtWOSeqs")
+F.Data.DataTable.Close("dtCustMast")
+F.Data.DataTable.Close("dtSOHead")
+
+F.Data.DataTable.AddColumn("dtWOMats","SELECT","Boolean",False)
+
+F.Data.DataView.Create("dtWOMats","dvWOMats")
+F.Data.DataView.Create("dtWOMats","dvVWOMats")
+
+F.Intrinsic.Control.Catch
+	F.Intrinsic.Control.CallSub(ErrorMessage,"ScriptFile",V.Caller.ScriptFile,"CurrentSubroutine",V.Ambient.CurrentSubroutine)
+	F.Intrinsic.Control.CallSub(F_MatPick_UnLoad)
+F.Intrinsic.Control.EndTry
+Program.Sub.LoadWOData.End
+
+Program.Sub.SetupGrid.Start
+V.Local.iVisibleIndex.Declare
+F.Intrinsic.Control.Try
+
+Gui.F_MatPick.gsgcMats.AddGridviewFromDataView("gvWOMats","dtWOMats","dvVWOMats")
+
+Gui.F_MatPick.gsgcMats.SetGridviewProperty("gvWOMats","Editable",False)
+Gui.F_MatPick.gsgcMats.SetGridviewProperty("gvWOMats","OptionsViewColumnAutoWidth",False)
+
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","WO","Visible",False)
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","WO","AllowShowHide",False)
+
+V.Local.iVisibleIndex.Set(-1)
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","SELECT","VisibleIndex",V.Local.iVisibleIndex.++)
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","JOB","VisibleIndex",V.Local.iVisibleIndex.++)
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","SUFFIX","VisibleIndex",V.Local.iVisibleIndex.++)
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","SEQ","VisibleIndex",V.Local.iVisibleIndex.++)
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","PART","VisibleIndex",V.Local.iVisibleIndex.++)
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","DESCRIPTION","VisibleIndex",V.Local.iVisibleIndex.++)
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","QTY_REQ","VisibleIndex",V.Local.iVisibleIndex.++)
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","CLOSED","VisibleIndex",V.Local.iVisibleIndex.++)
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","DATE_DUE","VisibleIndex",V.Local.iVisibleIndex.++)
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","CUSTOMER","VisibleIndex",V.Local.iVisibleIndex.++)
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","NAME_CUST","VisibleIndex",V.Local.iVisibleIndex.++)
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","CUST_PO","VisibleIndex",V.Local.iVisibleIndex.++)
+
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","SELECT","ShowCaption",False)
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","JOB","Caption","Job")
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","SUFFIX","Caption","Suffix")
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","SEQ","Caption","Seq")
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","PART","Caption","Part Num")
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","DESCRIPTION","Caption","Description")
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","QTY_REQ","Caption","Qty Required")
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","CLOSED","Caption","Closed")
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","DATE_DUE","Caption","Job Due Date")
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","CUSTOMER","Caption","Cust.")
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","NAME_CUST","Caption","Customer")
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","CUST_PO","Caption","Customer PO")
+
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","SELECT","MaxWidth",35)
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","SELECT","MinWidth",35)
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","JOB","Width",45)
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","JOB","MinWidth",45)
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","SUFFIX","Width",47)
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","SUFFIX","MinWidth",47)
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","SEQ","Width",45)
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","SEQ","MinWidth",45)
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","PART","Width",115)
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","PART","MinWidth",65)
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","DESCRIPTION","Width",145)
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","DESCRIPTION","MinWidth",75)
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","QTY_REQ","Width",85)
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","QTY_REQ","MinWidth",85)
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","CLOSED","Width",50)
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","CLOSED","MinWidth",50)
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","DATE_DUE","Width",85)
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","DATE_DUE","MinWidth",85)
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","CUSTOMER","Width",45)
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","CUSTOMER","MinWidth",45)
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","NAME_CUST","Width",145)
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","NAME_CUST","MinWidth",65)
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","CUST_PO","Width",115)
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","CUST_PO","MinWidth",80)
+
+Gui.F_MatPick.gsgcMats.SetColumnProperty("gvWOMats","DATE_DUE","DisplayCustomDateTime","d")
+
+Gui.F_MatPick.gsgcMats.MainView("gvWOMats")
+
+F.Intrinsic.Control.Catch
+	F.Intrinsic.Control.CallSub(ErrorMessage,"ScriptFile",V.Caller.ScriptFile,"CurrentSubroutine",V.Ambient.CurrentSubroutine)
+	F.Intrinsic.Control.CallSub(F_MatPick_UnLoad)
+F.Intrinsic.Control.EndTry
+Program.Sub.SetupGrid.End
+
+Program.Sub.cmdWOBRW_Click.Start
+V.Local.sBegJob.Declare
+V.Local.sBegSuf.Declare
+V.Local.sEndJob.Declare
+V.Local.sEndSuf.Declare
+V.Local.sRet.Declare
+F.Intrinsic.Control.Try
+
+F.Intrinsic.UI.Browser(1000,,V.Local.sRet)
+
+F.Intrinsic.Control.If(V.Local.sRet.IsNotCancel)
+	F.Intrinsic.String.Split(V.Local.sRet,"*!*",V.Local.sRet)
+	
+	F.Intrinsic.Control.If(V.Args.ControlName.UCase,=,"CMDBEGWOBRW")
+		'Beg WO fields
+		Gui.F_MatPick.txtBegJob.Text(V.Local.sRet(0).Trim)
+		Gui.F_MatPick.txtBegSuf.Text(V.Local.sRet(1).Trim)
+		F.Intrinsic.Control.If(V.Screen.F_MatPick!txtEndJob.Text.Trim,=,"")
+			Gui.F_MatPick.txtEndJob.Text(V.Local.sRet(0).Trim)
+			Gui.F_MatPick.txtEndSuf.Text(V.Local.sRet(1).Trim)
+		F.Intrinsic.Control.EndIf
+	F.Intrinsic.Control.Else
+		'End WO fields
+		Gui.F_MatPick.txtEndJob.Text(V.Local.sRet(0).Trim)
+		Gui.F_MatPick.txtEndSuf.Text(V.Local.sRet(1).Trim)
+	F.Intrinsic.Control.EndIf
+	
+	F.Intrinsic.String.LPad(V.Screen.F_MatPick!txtBegJob.Text," ",6,V.Local.sBegJob)
+	F.Intrinsic.String.LPad(V.Screen.F_MatPick!txtBegSuf.Text," ",3,V.Local.sBegSuf)
+	F.Intrinsic.String.LPad(V.Screen.F_MatPick!txtEndJob.Text," ",6,V.Local.sEndJob)
+	F.Intrinsic.String.LPad(V.Screen.F_MatPick!txtEndSuf.Text," ",3,V.Local.sEndSuf)
+	F.Intrinsic.String.Build("[WO] >= '{0}{1}' and [WO] <= '{2}{3}'",V.Local.sBegJob,V.Local.sBegSuf,V.Local.sEndJob,V.Local.sEndSuf,V.Local.sFilter)
+	F.Data.DataView.SetFilter("dtWOMats","dvVWOMats",V.Local.sFilter)
+	
+	'Reset all WO's not in the current dataview
+	F.Intrinsic.String.Build("[WO] < '{0}{1}' or [WO] > '{2}{3}'",V.Local.sJob,V.Local.sSuf,V.Local.sEndJob,V.Local.sEndSuf,V.Local.sFilter)
+	F.Data.DataView.SetFilter("dtWOMats","dvWOMats",V.Local.sFilter)
+	F.Data.DataView.SetValue("dtWOMats","dvWOMats",-1,"SELECT",False)
+F.Intrinsic.Control.EndIf
+
+F.Intrinsic.Control.Catch
+	F.Intrinsic.Control.CallSub(ErrorMessage,"ScriptFile",V.Caller.ScriptFile,"CurrentSubroutine",V.Ambient.CurrentSubroutine)
+	F.Intrinsic.Control.CallSub(F_MatPick_UnLoad)
+F.Intrinsic.Control.EndTry
+Program.Sub.cmdWOBRW_Click.End
+
+Program.Sub.gsgcMats_RowCellClick.Start
+V.Local.sFilter.Declare
+F.Intrinsic.Control.Try
+
+F.Intrinsic.Control.SelectCase(V.Args.Column.UCase)
+	F.Intrinsic.Control.Case("SELECT")
+		F.Intrinsic.Control.If(V.Args.Button.UCase,=,"LEFT")
+			'left click
+			F.Data.DataTable.SetValue("dtWOMats",V.Args.RowIndex,"SELECT",V.Args.CellValue.Not)
+		F.Intrinsic.Control.ElseIf(V.Args.Button.UCase,=,"RIGHT")
+			'right click
+			F.Intrinsic.String.Build("[WO] = '{0}'",V.DataTable.dtWOMats(V.Args.RowIndex).WO!FieldVal,V.Local.sFilter)
+			F.Data.DataView.SetFilter("dtWOMats","dvWOMats",V.Local.sFilter)
+			F.Data.DataView.SetValue("dtWOMats","dvWOMats",-1,"SELECT",V.Args.CellValue.Not)
+		F.Intrinsic.Control.EndIf
+F.Intrinsic.Control.EndSelect
+
+F.Intrinsic.Control.Catch
+	F.Intrinsic.Control.CallSub(ErrorMessage,"ScriptFile",V.Caller.ScriptFile,"CurrentSubroutine",V.Ambient.CurrentSubroutine)
+	F.Intrinsic.Control.CallSub(F_MatPick_UnLoad)
+F.Intrinsic.Control.EndTry
+Program.Sub.gsgcMats_RowCellClick.End
+
+Program.Sub.Serialize.Start
+V.Local.Serialize.Declare
+V.Local.sText.Declare
+F.Intrinsic.Control.Try
+
+'GridView - gvWOMats
+Gui.F_MatPick.gsgcMats.Serialize("gvWOMats",V.Local.Serialize)
+F.Global.Registry.AddValue(V.Caller.User,V.Caller.CompanyCode,"gvWOMats",6012,1000,False,"Serialize",False,0,-999.0,1/1/1980,12:00:00 AM,V.Local.Serialize)
+
+'Textboxes
+F.Intrinsic.String.Build("{0}$!${1}$!${2}$!${3}",V.Screen.F_MatPick!txtBegJob.Text,V.Screen.F_MatPick!txtBegSuf.Text,V.Screen.F_MatPick!txtEndJob.Text,V.Screen.F_MatPick!txtEndSuf.Text,V.Local.sText)
+F.Global.Registry.AddValue(V.Caller.User,V.Caller.CompanyCode,"Job Text",6012,2000,False,V.Local.sText,False,0,-999.0,1/1/1980,12:00:00 AM,"")
+
+F.Intrinsic.Control.Catch
+	F.Intrinsic.Control.CallSub(ErrorMessage,"ScriptFile",V.Caller.ScriptFile,"CurrentSubroutine",V.Ambient.CurrentSubroutine)
+	F.Intrinsic.Control.CallSub(F_MatPick_UnLoad)
+F.Intrinsic.Control.EndTry
+Program.Sub.Serialize.End
+
+Program.Sub.Deserialize.Start
+V.Local.Serialize.Declare
+V.Local.sText.Declare
+F.Intrinsic.Control.Try
+
+'GridView - gvWOMats
+F.Global.Registry.ReadValue(V.Caller.User,V.Caller.CompanyCode,"gvWOMats",6012,1000,6,"",V.Local.Serialize)
+F.Intrinsic.Control.If(V.Local.Serialize.Trim,<>,"")
+	Gui.F_MatPick.gsgcMats.Deserialize(V.Local.Serialize)
+F.Intrinsic.Control.EndIf
+
+'Textboxes
+F.Global.Registry.ReadValue(V.Caller.User,V.Caller.CompanyCode,"Job Text",6012,2000,5,"",V.Local.sText)
+F.Intrinsic.Control.If(v.Local.sText,<>,"")
+	F.Intrinsic.String.Split(V.Local.sText,"$!$",V.Local.sText)
+	
+	Gui.F_MatPick.txtBegJob.Text(V.Local.sText(0))
+	Gui.F_MatPick.txtBegSuf.Text(V.Local.sText(1))
+	Gui.F_MatPick.txtEndJob.Text(V.Local.sText(2))
+	Gui.F_MatPick.txtEndSuf.Text(V.Local.sText(3))
+F.Intrinsic.Control.EndIf
+
+F.Intrinsic.Control.Catch
+	F.Intrinsic.Control.CallSub(ErrorMessage,"ScriptFile",V.Caller.ScriptFile,"CurrentSubroutine",V.Ambient.CurrentSubroutine)
+	F.Intrinsic.Control.CallSub(F_MatPick_UnLoad)
+F.Intrinsic.Control.EndTry
+Program.Sub.Deserialize.End
+
+Program.Sub.cmdPrint_Click.Start
+V.Local.iBIRunID.Declare
+V.Local.iBIRptID.Declare
+V.Local.iBILogID.Declare
+F.Intrinsic.Control.Try
+
+Gui.F_MatPick..Enabled(False)
+
+'Get run ID
+F.Global.BI.GetRunID(V.Local.iBIRunID)
+
+'Get Report ID From Name
+F.Global.BI.GetIDFromName("GCG_6012_MatPick_Label.lab",V.Local.iBIRptID)
+
+'Starting BI Logging
+F.Global.BI.StartLogging(V.Local.iBIRunID,V.Local.iBIRptID,-1,"",V.Local.iBILogID)
+
+F.Data.DataView.SetFilter("dtWOMats","dvWOMats","[SELECT]")
+F.Data.DataView.ToDataTable("dtWOMats","dvWOMats","dtPrint")
+
+F.Global.BI.StopLogging(V.Local.iBILogID)
+
+F.Intrinsic.Control.If(V.DataTable.dtPrint.RowCount,=,0)
+	'No rows to print, exit sub
+	F.Data.DataTable.Close("dtPrint")
+	Gui.F_MatPick..Enabled(True)
+	Gui.F_MatPick..SetFocus
+	F.Intrinsic.Control.ExitSub
+F.Intrinsic.Control.EndIf
+F.Data.DataTable.AddColumn("dtPrint","V_DATE_DUE","String")
+F.Data.DataTable.SetValueFormat("dtPrint",-1,"DATE_DUE","V_DATE_DUE","MM/DD/YYYY")
+F.Data.DataTable.AddColumn("dtPrint","V_QTY_REQ","String")
+F.Data.DataTable.SetValueFormat("dtPrint",-1,"QTY_REQ","V_QTY_REQ","0.0000")
+F.Data.DataTable.RemoveColumn("dtPrint","SELECT")
+F.Data.DataTable.RemoveColumn("dtPrint","WO")
+F.Data.DataTable.RemoveColumn("dtPrint","CLOSED")
+F.Data.DataTable.RemoveColumn("dtPrint","CUSTOMER")
+F.Data.DataTable.RemoveColumn("dtPrint","DATE_DUE")
+F.Data.DataTable.RemoveColumn("dtPrint","QTY_REQ")
+'Print Codesoft Label from DataTable
+F.Global.BI.PrintCodesoftLabelFromDatatable(V.Local.iBIRunID,V.Local.iBILogID,"dtPrint","",True) 
+
+F.Intrinsic.Control.CallSub(F_MatPick_UnLoad)
+
+F.Intrinsic.Control.Catch
+	F.Intrinsic.Control.CallSub(ErrorMessage,"ScriptFile",V.Caller.ScriptFile,"CurrentSubroutine",V.Ambient.CurrentSubroutine)
+	F.Intrinsic.Control.CallSub(F_MatPick_UnLoad)
+F.Intrinsic.Control.EndTry
+Program.Sub.cmdPrint_Click.End
